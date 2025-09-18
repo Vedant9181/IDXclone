@@ -1,0 +1,27 @@
+* {
+  box-sizing: border-box;
+}
+
+.editor-button {
+  outline: none;
+  min-width: 100px;
+  background-color: black;
+  color: white;
+  padding: 6px 7px 3px 7px;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+}
+
+.editor-button:not(.active):hover {
+  background-color: #1b2b34;
+  color: wheat;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.editor-button.active {
+  background-color: #1b2b34;
+  color: wheat;
+  border-top: 2px solid red;
+}
