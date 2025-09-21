@@ -26,10 +26,10 @@ export const EditorComponent = function () {
     downloadTheme();
   }, []);
   return (
-    <div>
+    <>
       {editorState.theme && (
         <Editor
-          height="80vh"
+          height="100vh"
           width="100%"
           defaultLanguage="javascript"
           defaultValue="// some comment"
@@ -40,6 +40,6 @@ export const EditorComponent = function () {
           onMount={handleEditorTheme}
         />
       )}
-    </div>
+    </>
   );
 };

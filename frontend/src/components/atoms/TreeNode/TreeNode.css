@@ -1,0 +1,81 @@
+/* File Explorer Container */
+.file-explorer {
+  background-color: #1e1e1e;
+  color: #cccccc;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 13px;
+  user-select: none;
+  width: 300px;
+  min-height: 100vh;
+  overflow: auto;
+  border-right: 1px solid #3e3e3e;
+}
+
+/* Tree Item Base */
+.tree-item {
+  display: flex;
+  align-items: center;
+  height: 22px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.1s ease;
+  white-space: nowrap;
+  padding: 0 8px;
+}
+
+/* Folder Specific Styles */
+.tree-item.folder {
+  color: #cccccc;
+}
+
+.tree-item.folder:hover {
+  background-color: #2a2d2e;
+}
+
+.tree-item.folder .icon {
+  color: #90a4ae;
+}
+
+/* File Specific Styles */
+.tree-item.file {
+  color: #cccccc;
+}
+
+.tree-item.file:hover {
+  background-color: #094771;
+}
+
+/* Chevron Icon */
+.chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  color: #cccccc;
+}
+
+/* File/Folder Icon */
+.icon {
+  display: flex;
+  align-items: center;
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+/* File/Folder Name */
+.name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* File Type Specific Colors */
+.file-js .icon { color: #f7df1e; }
+.file-jsx .icon { color: #f7df1e; }
+.file-ts .icon { color: #3178c6; }
+.file-tsx .icon { color: #3178c6; }
+.file-css .icon { color: #1572b6; }
+.file-json .icon { color: #ffa500; }
+.file-default .icon { color: #a9a9a9; }
