@@ -1,20 +1,27 @@
+// import { useActiveFileTabStore } from "../../../store/activeFileTabStore";
 import "./EditorButton.css";
 
-export function EditorButton({ activeTab, setActiveTab, value }) {
-  {
-    /* */
-  }
-  function handleButtonClick(value) {
-    setActiveTab({ value });
+export function EditorButton({
+  activeFileTab,
+  setActiveFileName,
+  activeFileName,
+}) {
+  const fileNameArr = activeFileTab.path.split("\\");
+  console.log(fileNameArr);
+  const fileName = fileNameArr[fileNameArr.length - 1];
+  console.log("filenaame:", fileName);
+
+  function handleButtonClick(fileName) {
+    setActiveFileName(fileName);
   }
   return (
     <button
       className={`${
-        activeTab.value === value ? "editor-button active" : "editor-button"
+        activeFileName === fileName ? "editor-button active" : "editor-button"
       }`}
-      onClick={() => handleButtonClick(value)}
+      onClick={() => handleButtonClick(fileName)}
     >
-      {value}
+      {fileName}
     </button>
   );
 }

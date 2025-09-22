@@ -6,18 +6,21 @@ import {
   VscFolder,
 } from "react-icons/vsc";
 import { FileIcon } from "../FileIcon/FileIcon.jsx";
+import { useEditorSocketStore } from "../../../store/editorSocketStore.js";
 
 export function TreeNode({ fileFolderData }) {
   const [visibility, setVisibility] = useState({});
 
-  function toggleVisibility(folderName) {
-    setVisibility({ ...visibility, [folderName]: !visibility[folderName] });
-  }
+  const { editorSocket } = useEditorSocketStore();
 
-  function computeExtension(fileFolderData) {
+  const toggleVisibility = (folderName) => {
+    setVisibility({ ...visibility, [folderName]: !visibility[folderName] });
+  };
+
+  const computeExtension = (fileFolderData) => {
     const names = fileFolderData.name.split(".");
     return names[names.length - 1];
-  }
+  };
 
   const sortChildren = (children) => {
     return children.sort((a, b) => {
@@ -27,6 +30,10 @@ export function TreeNode({ fileFolderData }) {
 
       // If both are folders or both are files, sort alphabetically
     });
+  };
+
+  const handleSelectedFile = (fileFolderData) => {
+    editorSocket.emit("readFile", { pathToFileOrFolder: fileFolderData.path });
   };
 
   useEffect(() => {
@@ -81,6 +88,7 @@ export function TreeNode({ fileFolderData }) {
                 cursor: "pointer",
                 marginLeft: "5px",
               }}
+              onClick={() => handleSelectedFile(fileFolderData)}
             >
               {fileFolderData.name}
             </p>

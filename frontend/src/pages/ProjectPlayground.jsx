@@ -6,31 +6,44 @@ import { useActiveFileTabStore } from "../store/activeFileTabStore.js";
 import { TreeStructure } from "../components/organisms/TreeStructure.jsx";
 import { useEffect } from "react";
 import { useTreeStructureStore } from "../store/treeStructureStore.js";
+import { io } from "socket.io-client";
+import { useEditorSocketStore } from "../store/editorSocketStore.js";
 
 export function ProjectPlayground() {
   // const [activeTab, setActiveTab] = useState("file.js");
 
-  const { activeFileTab, setActiveFileTab } = useActiveFileTabStore();
+  const { activeFileTab, activeFileName, setActiveFileName } =
+    useActiveFileTabStore();
 
   const { projectId: projectIdFromURL } = useParams();
 
   const { projectId, setProjectId } = useTreeStructureStore();
 
+  const { setEditorSocketStore } = useEditorSocketStore();
+
   useEffect(() => {
     setProjectId(projectIdFromURL);
-  }, [projectIdFromURL, setProjectId]);
+
+    const socket = io(`${import.meta.env.VITE_BACKEND_URL}/editor`, {
+      query: {
+        projectId: projectIdFromURL,
+      },
+    });
+
+    setEditorSocketStore(socket);
+
+    return () => socket.disconnect();
+    // socket.on
+  }, [projectIdFromURL, setProjectId, setEditorSocketStore]);
   return (
     <>
-      <EditorButton
-        activeTab={activeFileTab}
-        setActiveTab={setActiveFileTab}
-        value={"file.js"}
-      />
-      <EditorButton
-        activeTab={activeFileTab}
-        setActiveTab={setActiveFileTab}
-        value={"next.js"}
-      />
+      {activeFileTab && (
+        <EditorButton
+          activeFileTab={activeFileTab}
+          activeFileName={activeFileName}
+          setActiveFileName={setActiveFileName}
+        />
+      )}
       <div style={{ display: "flex" }}>
         {projectId && (
           <div
