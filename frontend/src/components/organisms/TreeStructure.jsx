@@ -14,8 +14,8 @@ export function TreeStructure() {
   }, [setTreeStructure, treeStructure]);
 
   return (
-    <div>
+    <>
       <TreeNode fileFolderData={treeStructure} />
-    </div>
+    </>
   );
 }

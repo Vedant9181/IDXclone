@@ -1,8 +1,16 @@
 import { Editor } from "@monaco-editor/react";
 import { useEffect, useState } from "react";
+import { useEditorSocketStore } from "../../../store/editorSocketStore.js";
+import { useActiveFileTabStore } from "../../../store/activeFileTabStore.js";
 
 export const EditorComponent = function () {
+  console.log("Editorcomponenet logic");
   const [editorState, setEditorState] = useState({ theme: null });
+
+  const { editorSocket } = useEditorSocketStore();
+
+  const { activeFileTab, setActiveFileTab } = useActiveFileTabStore();
+
   async function downloadTheme() {
     console.log("useeffect cb");
     const response = await fetch("../../../Oceanic_Next.json");
@@ -19,10 +27,12 @@ export const EditorComponent = function () {
     monaco.editor.setTheme("oceanic-next");
   }
 
+  editorSocket?.on("readFileSuccess", (data) => {
+    console.log("Read file success", data);
+    setActiveFileTab({ path: data.path, value: data.data });
+  });
+
   useEffect(() => {
-    for (let index = 0; index < 1000000000; index++) {
-      //
-    }
     downloadTheme();
   }, []);
   return (
@@ -31,13 +41,18 @@ export const EditorComponent = function () {
         <Editor
           height="100vh"
           width="100%"
-          defaultLanguage="javascript"
+          defaultLanguage={undefined}
           defaultValue="// some comment"
           options={{
             fontSize: 18,
             fontFamily: "monospace",
           }}
           onMount={handleEditorTheme}
+          value={
+            activeFileTab?.value
+              ? activeFileTab.value
+              : "//Welcome to playground"
+          }
         />
       )}
     </>
