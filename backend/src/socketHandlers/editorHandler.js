@@ -1,8 +1,20 @@
 import fs from "fs/promises";
 
-export const handleEditorSocket = (socket) => {
+export const handleEditorSocket = (socket, editorNamespace, projectId) => {
   socket.on("readFile", async ({ pathToFileOrFolder }) => {
     try {
+      let currentSocketRoom = Array.from(socket.rooms).find(
+        (room) => room !== socket.id && room.startsWith(projectId)
+      ); // the prev room socket had joined
+
+      if (currentSocketRoom) {
+        console.log("remov");
+        socket.leave(currentSocketRoom);
+      }
+      var fileName = pathToFileOrFolder.split("\\").pop();
+
+      socket.join(`${projectId}_${fileName}`);
+
       const response = await fs.readFile(pathToFileOrFolder, "utf-8");
       socket.emit("readFileSuccess", {
         data: response,
@@ -18,9 +30,12 @@ export const handleEditorSocket = (socket) => {
 
   socket.on("writeFile", async ({ data, pathToFileOrFolder }) => {
     try {
+      let fileName = pathToFileOrFolder.split("\\").pop();
+
       const response = await fs.writeFile(pathToFileOrFolder, data);
-      socket.emit("writeFileSuccess", {
+      socket.in(`${projectId}_${fileName}`).emit("writeFileSuccess", {
         data: "File written successfully",
+        path: pathToFileOrFolder,
       });
     } catch (error) {
       console.log("Error writing the file", error);
@@ -32,8 +47,10 @@ export const handleEditorSocket = (socket) => {
 
   socket.on("createFile", async ({ pathToFileOrFolder }) => {
     try {
-      const response = await fs.writeFile(pathToFileOrFolder, "", "wx");
-      socket.emit("createFileSuccess", {
+      const response = await fs.writeFile(pathToFileOrFolder, "", {
+        flag: "wx",
+      });
+      editorNamespace.emit("createFileSuccess", {
         data: "File created successfully",
       });
     } catch (error) {
@@ -44,10 +61,24 @@ export const handleEditorSocket = (socket) => {
     }
   });
 
+  socket.on("renameFile", async ({ oldPath, newPath }) => {
+    try {
+      const response = await fs.rename(oldPath, newPath);
+      editorNamespace.emit("renameFileSuccess", {
+        data: "File renamed successfully",
+      });
+    } catch (error) {
+      console.log("Error renaming the file", error);
+      socket.emit("error", {
+        data: "Error renaming the file",
+      });
+    }
+  });
+
   socket.on("deleteFile", async ({ pathToFileOrFolder }) => {
     try {
       const response = await fs.rm(pathToFileOrFolder);
-      socket.emit("deleteFileSuccess", {
+      editorNamespace.emit("deleteFileSuccess", {
         data: "File deleted successfully",
       });
     } catch (error) {
@@ -61,7 +92,7 @@ export const handleEditorSocket = (socket) => {
   socket.on("createFolder", async ({ pathToFileOrFolder }) => {
     try {
       const response = await fs.mkdir(pathToFileOrFolder);
-      socket.emit("createFolderSuccess", {
+      editorNamespace.emit("createFolderSuccess", {
         data: "Folder created successfully",
       });
     } catch (error) {
@@ -72,10 +103,24 @@ export const handleEditorSocket = (socket) => {
     }
   });
 
+  socket.on("renameFolder", async ({ oldPath, newPath }) => {
+    try {
+      const response = await fs.rename(oldPath, newPath);
+      editorNamespace.emit("renameFolderSuccess", {
+        data: "Folder renamed successfully",
+      });
+    } catch (error) {
+      console.log("Error renaming the Folder", error);
+      socket.emit("error", {
+        data: "Error renaming the Folder",
+      });
+    }
+  });
+
   socket.on("deleteFolder", async ({ pathToFileOrFolder }) => {
     try {
-      const response = await fs.rmdir(pathToFileOrFolder, { recursive: true });
-      socket.emit("deleteFolderSuccess", {
+      const response = await fs.rm(pathToFileOrFolder, { recursive: true, force: true });
+      editorNamespace.emit("deleteFolderSuccess", {
         data: "Folder deleted successfully",
       });
     } catch (error) {

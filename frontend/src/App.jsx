@@ -7,6 +7,7 @@ import { ProjectPlayground } from "./pages/ProjectPlayground.jsx";
 
 function App() {
   // const socket = io("http://localhost:3000");
+
   return (
     <>
       <Routes>

@@ -2,7 +2,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { create } from "zustand";
 import { getProjectTree } from "../apis/project";
 
-export const useTreeStructureStore = create((set,get) => {
+export const useTreeStructureStore = create((set, get) => {
   const queryClient = new QueryClient();
   return {
     projectId: null,

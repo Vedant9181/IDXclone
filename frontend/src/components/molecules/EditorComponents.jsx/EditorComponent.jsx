@@ -1,15 +1,16 @@
 import { Editor } from "@monaco-editor/react";
 import { useEffect, useState } from "react";
-import { useEditorSocketStore } from "../../../store/editorSocketStore.js";
 import { useActiveFileTabStore } from "../../../store/activeFileTabStore.js";
+import { useEditorSocketStore } from "../../../store/editorSocketStore.js";
+import { extensionToFileType } from "../../../utils/extensionToFileType.js";
 
 export const EditorComponent = function () {
-  console.log("Editorcomponenet logic");
+  let timeOutId;
   const [editorState, setEditorState] = useState({ theme: null });
 
-  const { editorSocket } = useEditorSocketStore();
+  const { activeFileTab } = useActiveFileTabStore();
 
-  const { activeFileTab, setActiveFileTab } = useActiveFileTabStore();
+  const { editorSocket } = useEditorSocketStore();
 
   async function downloadTheme() {
     console.log("useeffect cb");
@@ -22,15 +23,21 @@ export const EditorComponent = function () {
   function handleEditorTheme(editor, monaco) {
     console.log("onmount cb");
 
-    // console.log(editor);
     monaco.editor.defineTheme("oceanic-next", editorState.theme);
     monaco.editor.setTheme("oceanic-next");
   }
 
-  editorSocket?.on("readFileSuccess", (data) => {
-    console.log("Read file success", data);
-    setActiveFileTab({ path: data.path, value: data.data });
-  });
+  function handleEditorChange(data) {
+    clearTimeout(timeOutId);
+
+    timeOutId = setTimeout(() => {
+      console.log("executing settimeout on handle change");
+      editorSocket.emit("writeFile", {
+        data,
+        pathToFileOrFolder: activeFileTab.path,
+      });
+    }, 2000);
+  }
 
   useEffect(() => {
     downloadTheme();
@@ -44,10 +51,12 @@ export const EditorComponent = function () {
           defaultLanguage={undefined}
           defaultValue="// some comment"
           options={{
-            fontSize: 18,
+            fontSize: 15,
             fontFamily: "monospace",
           }}
+          language={extensionToFileType(activeFileTab?.extension)}
           onMount={handleEditorTheme}
+          onChange={handleEditorChange}
           value={
             activeFileTab?.value
               ? activeFileTab.value

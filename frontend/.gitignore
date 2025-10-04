@@ -9,7 +9,7 @@ lerna-debug.log*
 .env
 node_modules
 temp.js
-components/atoms/EdiorButton
+components/atoms/EdiorButton.jsx
 dist
 dist-ssr
 *.local

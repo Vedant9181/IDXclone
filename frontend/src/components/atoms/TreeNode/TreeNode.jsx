@@ -1,3 +1,5 @@
+import "./TreeNode.css";
+
 import { useEffect, useState } from "react";
 import {
   VscChevronRight,
@@ -7,11 +9,32 @@ import {
 } from "react-icons/vsc";
 import { FileIcon } from "../FileIcon/FileIcon.jsx";
 import { useEditorSocketStore } from "../../../store/editorSocketStore.js";
+import { useActiveFileTabStore } from "../../../store/activeFileTabStore.js";
+import { useFileContextMenuStore } from "../../../store/fileContextMenuStore.js";
+import { useFolderContextMenuStore } from "../../../store/folderContextMenuStore.js";
 
 export function TreeNode({ fileFolderData }) {
   const [visibility, setVisibility] = useState({});
 
   const { editorSocket } = useEditorSocketStore();
+
+  const { activeFileTab } = useActiveFileTabStore();
+
+  const {
+    setX,
+    setY,
+    setIsOpen: setIsFileContextMenuOpen,
+    setFile,
+    file: activeFile,
+  } = useFileContextMenuStore();
+
+  const {
+    setX: setFolderX,
+    setY: setFolderY,
+    setIsOpen: setIsFolderContextMenuOpen,
+    setFolder,
+    folder: activeFolder,
+  } = useFolderContextMenuStore();
 
   const toggleVisibility = (folderName) => {
     setVisibility({ ...visibility, [folderName]: !visibility[folderName] });
@@ -33,7 +56,27 @@ export function TreeNode({ fileFolderData }) {
   };
 
   const handleSelectedFile = (fileFolderData) => {
+    if (activeFileTab?.path === fileFolderData.path) return;
     editorSocket.emit("readFile", { pathToFileOrFolder: fileFolderData.path });
+  };
+
+  const handleContextMenuForFiles = (e, path) => {
+    console.log(e);
+    e.preventDefault();
+    setFile(path);
+    setX(e.clientX);
+    setY(e.clientY);
+    setIsFileContextMenuOpen(true);
+  };
+
+  const handleContextMenuForFolders = (e, fileFolderData) => {
+    e.preventDefault();
+    setFolder(fileFolderData.path);
+    setFolderX(e.clientX);
+    setFolderY(e.clientY);
+    setIsFolderContextMenuOpen(true);
+    
+    if (!visibility[fileFolderData.name]) setVisibility({ ...visibility, [fileFolderData.name]: true });
   };
 
   useEffect(() => {
@@ -42,26 +85,19 @@ export function TreeNode({ fileFolderData }) {
 
   return (
     fileFolderData && (
-      <div
-        style={{
-          paddingLeft: "15px",
-          color: "white",
-        }}
-      >
+      <div style={{ paddingLeft: "15px", color: "white" }}>
         {fileFolderData.children ? (
-          <>
+          <div
+            className={`${
+              activeFolder === fileFolderData.path ? "activeFolder" : ""
+            }`}
+            onContextMenu={(e) =>
+              handleContextMenuForFolders(e, fileFolderData)
+            }
+          >
             <button
               onClick={() => toggleVisibility(fileFolderData.name)}
-              style={{
-                border: "none",
-                cursor: "pointer",
-                outline: "none",
-                color: "white",
-                paddingTop: "15px",
-                fontSize: "16px",
-                backgroundColor: "transparent",
-                maxWidth: "100%",
-              }}
+              className="folder-button"
             >
               {visibility[fileFolderData.name] ? (
                 <>
@@ -76,21 +112,29 @@ export function TreeNode({ fileFolderData }) {
               )}
               {fileFolderData.name}
             </button>
-          </>
+          </div>
         ) : (
-          <div style={{ display: "flex", alignItems: "center" , justifyContent: "start"}}>
+          <div
+            className={`file-node ${
+              activeFileTab?.path === fileFolderData.path ? "selected" : ""
+            } 
+            ${activeFile === fileFolderData.path ? "active" : ""}`}
+            onClick={() => handleSelectedFile(fileFolderData)}
+            onContextMenu={(e) =>
+              handleContextMenuForFiles(e, fileFolderData.path)
+            }
+          >
             <FileIcon extension={computeExtension(fileFolderData)} />
 
             <p
               style={{
                 paddingTop: "15px",
-                paddingBottom: "15px",
+                paddingBottom: "21px",
                 marginTop: "8px",
                 fontSize: "15px",
                 cursor: "pointer",
                 marginLeft: "5px",
               }}
-              onClick={() => handleSelectedFile(fileFolderData)}
             >
               {fileFolderData.name}
             </p>

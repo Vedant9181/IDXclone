@@ -45,20 +45,28 @@ editorNamespace.on("connection", (socket) => {
   });
 
   watcher.on("all", (event, path) => {
-    console.log("watcher all event listener");
-    console.log(event, path);
+    // console.log("watcher all event listener");
+    // console.log(event, path);
   });
 
   // socket.on("message", (data) => {
   //   console.log("got a messagae event", data);
   // });
 
-  handleEditorSocket(socket);
+  handleEditorSocket(socket, editorNamespace, projectId);
 
   socket.on("disconnect", async (reason) => {
     await watcher.close();
     console.log("editor disconnected ", reason);
   });
+});
+
+editorNamespace.adapter.on("create-room", (room) => {
+  console.log(`room ${room} was created`);
+});
+
+editorNamespace.adapter.on("join-room", (room, id) => {
+  console.log(`socket ${id} has joined room ${room}`);
 });
 
 server.listen(PORT, () => {
