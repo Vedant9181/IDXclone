@@ -2,6 +2,7 @@ import "./ContextMenu.css";
 import { useClickOutside } from "../../../hooks/utils/useClickOutside.js";
 import { useFolderContextMenuStore } from "../../../store/folderContextMenuStore.js";
 import { useFileSystemModalStore } from "../../../store/fileSystemModalStore.js";
+import { useEffect } from "react";
 
 export const FolderContextMenu = ({ x, y, path }) => {
   console.log("rerender foldercontextjsx");
@@ -32,11 +33,22 @@ export const FolderContextMenu = ({ x, y, path }) => {
   }
 
   function handleFolderDelete() {
-    openModal("deleteFolder", path,folderName);
-    console.log("Deleting folder at", path, );
+    openModal("deleteFolder", path, folderName);
+    console.log("Deleting folder at", path);
     setIsOpen(false);
     setFolder(null);
   }
+
+  useEffect(() => {
+    const sidebar = document.querySelector(".sidebar-file-explorer");
+    const originalOverflow = sidebar.style.overflow;
+
+    sidebar.style.overflow = "hidden";
+
+    return () => {
+      sidebar.style.overflow = originalOverflow;
+    };
+  }, []);
 
   // function handleOnMouseLeave() {
   //   setIsOpen(false);

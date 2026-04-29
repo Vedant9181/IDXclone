@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useTreeStructureStore } from "../store/treeStructureStore.js";
 import { io } from "socket.io-client";
 import { useEditorSocketStore } from "../store/editorSocketStore.js";
+import { BrowserTerminal } from "../components/molecules/BrowserTerminal/BrowserTerminal.jsx";
 
 export function ProjectPlayground() {
   // const [activeTab, setActiveTab] = useState("file.js");
@@ -41,13 +42,14 @@ export function ProjectPlayground() {
       <div style={{ display: "flex" }}>
         {projectId && (
           <div
+            className="sidebar-file-explorer"
             style={{
               backgroundColor: "#344a57",
               paddingRight: "10px",
               paddingTop: "0.3vh",
               minWidth: "250px",
               maxWidth: "25%",
-              height: "100vh",
+              height: "99.7vh",
               overflow: "auto",
             }}
           >
@@ -56,6 +58,10 @@ export function ProjectPlayground() {
         )}
 
         <EditorComponent />
+      </div>
+
+      <div>
+        <BrowserTerminal />
       </div>
     </>
   );

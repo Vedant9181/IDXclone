@@ -6,6 +6,9 @@ import apiRouter from "./routes/index.js";
 import { PORT } from "./config/serverConfig.js";
 import chokidar from "chokidar";
 import { handleEditorSocket } from "./socketHandlers/editorHandler.js";
+import { handleContainerCreate } from "./containers/handleContainerCreate.js";
+import { WebSocketServer } from "ws";
+import { handleTerminalCreation } from "./containers/handleTerminalCreation.js";
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -61,14 +64,60 @@ editorNamespace.on("connection", (socket) => {
   });
 });
 
-editorNamespace.adapter.on("create-room", (room) => {
-  console.log(`room ${room} was created`);
+let webSocketServer = new WebSocketServer({ noServer: true });
+
+server.on("upgrade", (req, tcp, head) => {
+  const isTerminal = req.url.includes("/terminal");
+  const projectId = req.url.split("=")[1];
+
+  if (isTerminal) {
+    console.log("Terminal upgrade request:", req.url);
+    const container = global.containerMap?.get(projectId);
+
+    if (!container) {
+      console.error("Container not found for project:", projectId);
+      // tcp.destroy();
+      return;
+    }
+
+    webSocketServer.handleUpgrade(req, tcp, head, (ws) => {
+      console.log("WebSocket upgraded successfully");
+      webSocketServer.emit("connection", ws, req, container);
+    });
+  }
 });
 
-editorNamespace.adapter.on("join-room", (room, id) => {
-  console.log(`socket ${id} has joined room ${room}`);
+webSocketServer.on("connection", (ws, req, container) => {
+  console.log("Terminal connected", container);
+  handleTerminalCreation(container, ws);
 });
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// const terminalNamespace = io.of("/terminal");
+
+// terminalNamespace.on("connection", (socket) => {
+//   console.log("connected to terminal socket", socket.id);
+
+//   let projectId = socket.handshake.query["projectId"];
+
+//   socket.on("shell-input", (data) => {
+//     socket.emit("shell-output", data);
+//   });
+
+//   socket.on("disconnect", async (reason) => {
+//     console.log("terminal disconnected ", reason, socket.id);
+//   });
+
+//   handleContainerCreate(projectId,socket)
+// });
+
+// editorNamespace.adapter.on("create-room", (room) => {
+//   console.log(`room ${room} was created`);
+// });
+
+// editorNamespace.adapter.on("join-room", (room, id) => {
+//   console.log(`socket ${id} has joined room ${room}`);
+// });

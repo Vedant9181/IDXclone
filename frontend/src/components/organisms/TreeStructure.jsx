@@ -25,6 +25,7 @@ export const TreeStructure = () => {
   } = useFolderContextMenuStore();
 
   useEffect(() => {
+    
     if (treeStructure) {
       console.log("tree", treeStructure);
     } else {

@@ -4,6 +4,7 @@ import "./ContextMenu.css";
 import { useClickOutside } from "../../../hooks/utils/useClickOutside.js";
 import { useFileContextMenuStore } from "../../../store/fileContextMenuStore.js";
 import { useFileSystemModalStore } from "../../../store/fileSystemModalStore.js";
+import { useEffect } from "react";
 
 export const FileContextMenu = ({ x, y, path }) => {
   const { setIsOpen: isFileContextMenuOpen, setFile } =
@@ -23,6 +24,17 @@ export const FileContextMenu = ({ x, y, path }) => {
     openModal("renameFile", path, fileName);
     isFileContextMenuOpen(false);
   }
+  useEffect(() => {
+    const sidebar = document.querySelector(".sidebar-file-explorer");
+    const originalOverflow = sidebar.style.overflow;
+
+    sidebar.style.overflow = "hidden";
+
+    return () => {
+      sidebar.style.overflow = originalOverflow;
+    };
+  }, []);
+
   return (
     // onclicking outside the context menu anywhere in the dom, it should close
     <div
